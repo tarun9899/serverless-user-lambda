@@ -5,7 +5,7 @@ import { RetryLink } from '@apollo/client/link/retry';
 import { onError } from '@apollo/client/link/error';
 import { setContext } from '@apollo/client/link/context';
 import * as uuid from "uuid";
-
+let userData: any[] = [];
 const endpoint = process.env.GraphQLAppsyncUrl;
 console.info('Endpoint: ', endpoint);
 let token: string;
@@ -53,7 +53,7 @@ const errorLink = onError(error => {
 });
 
 export async function appsyncGetDB(event, authToken): Promise<any[]> {
-    let publications: any[] = [];
+
     token = authToken;
     console.log('authlink', authLink)
     const client = new ApolloClient({
@@ -77,7 +77,7 @@ export async function appsyncGetDB(event, authToken): Promise<any[]> {
         },
     }).then(async result => {
         if (result.data !== null) {
-            publications = result.data;
+            userData = result.data;
             console.log(result.data);
         }
     }).catch((error) => {
@@ -85,10 +85,10 @@ export async function appsyncGetDB(event, authToken): Promise<any[]> {
             console.info(`Error from DMYO : ${error.graphQLErrors[0].message}`);
         }
     });
-    return publications;
+    return userData;
 }
 
-export async function appsyncSaveDB(event): Promise<any[]> {
+export async function appsyncSaveDB(event: any): Promise<any[]> {
     console.log('event', JSON.parse(event.body))
     const { firstName, lastName, gender, age, department } = JSON.parse(event.body);
     const appsyncClient = new ApolloClient({
@@ -107,23 +107,121 @@ export async function appsyncSaveDB(event): Promise<any[]> {
     console.log('paramJson', paramJson)
     await appsyncClient.mutate({
         mutation: gql` mutation createUserInfoDevTable($input: CreateUserInfoDevTableInput!) {
-                                                                                            createUserInfoDevTable(input: $input) {
-                                                                                                                                    age
-                                                                                                                                    department
-                                                                                                                                    gender
-                                                                                                                                    firstName
-                                                                                                                                    lastName
-                                                                                                                                    userId
-                                                                                                                                 }
+                        createUserInfoDevTable(input: $input) {
+                        age
+                         department
+                         gender
+                         firstName
+                         lastName
+                         userId
+           }
        }`,
         variables: {
             input: paramJson
         }
     }).then(async resultObj => {
         console.log('paramJson', paramJson)
-        console.log(resultObj.data);
-        return resultObj.data
+        console.log('data', resultObj.data.createUserInfoDevTable);
+        userData = resultObj.data.createUserInfoDevTable
     });
-    return;
+    return userData;
+}
+
+export async function appsyncALLDB(): Promise<any[]> {
+    const appsyncClient = new ApolloClient({
+        link: ApolloLink.from([errorLink, retryLink, authLink.concat(httpLink)]),
+        cache: new InMemoryCache()
+    });
+
+    await appsyncClient.query({
+        query: gql` query listUserInfoDevTables {
+               listUserInfoDevTables {
+               items {
+                  age
+                  department
+                  firstName
+                  gender
+                  lastName
+                  userId
+                 }
+            }
+        }`,
+        variables: {
+
+        }
+    }).then(async resultObj => {
+        console.log('data', resultObj.data.listUserInfoDevTables);
+        userData = resultObj.data.listUserInfoDevTables
+    });
+    return userData;
+}
+
+export async function appsyncDeleteDB(event: any): Promise<any[]> {
+    const appsyncClient = new ApolloClient({
+        link: ApolloLink.from([errorLink, retryLink, authLink.concat(httpLink)]),
+        cache: new InMemoryCache()
+    });
+    const paramJson = {
+        userId: event.pathParameters.userId
+    };
+    console.log('paramJson', paramJson)
+    await appsyncClient.mutate({
+        mutation: gql` mutation deleteUserInfoDevTable($input:DeleteUserInfoDevTableInput!) {
+                        deleteUserInfoDevTable(input:$input) {
+                        age
+                        department
+                        firstName
+                        gender
+                        lastName
+                        userId
+                    }
+            }`,
+        variables: {
+            input: paramJson
+        }
+    }).then(async resultObj => {
+        console.log('data', resultObj.data.deleteUserInfoDevTable);
+        userData = resultObj.data.deleteUserInfoDevTable
+    });
+    return userData;
+}
+
+export async function appsyncUpdateeDB(event: any): Promise<any[]> {
+    console.log('event', JSON.parse(event.body))
+    const { firstName, lastName, gender, age, department } = JSON.parse(event.body);
+    const appsyncClient = new ApolloClient({
+        link: ApolloLink.from([errorLink, retryLink, authLink.concat(httpLink)]),
+        cache: new InMemoryCache()
+    });
+
+    const paramJson = {
+        firstName: firstName,
+        lastName: lastName,
+        gender: gender,
+        age: age,
+        department: department,
+        userId: event.pathParameters.userId
+    };
+    console.log('paramJson', paramJson)
+    await appsyncClient.mutate({
+        mutation: gql` mutation updateUserInfoDevTable($input: UpdateUserInfoDevTableInput!) {
+                        updateUserInfoDevTable(input: $input) {
+                        age
+                         department
+                         gender
+                         firstName
+                         lastName
+                         userId
+           }
+       }`,
+        variables: {
+            input: paramJson
+        }
+    }).then(async resultObj => {
+        console.log('paramJson', paramJson)
+        console.log('data', resultObj.data.updateUserInfoDevTable);
+        userData = resultObj.data.updateUserInfoDevTable
+    });
+    return userData;
 }
 

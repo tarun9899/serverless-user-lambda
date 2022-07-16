@@ -1,6 +1,6 @@
 
 import { Delete_Failure_Message, Delete_Success_Message, Dyanamo_DB_GET_Error, Failure_Code, Failure_Message, Success_Code, Success_Message } from "src/constants/UserConstants";
-import { appsyncGetDB, appsyncSaveDB } from "src/db/appsync";
+import { appsyncALLDB, appsyncDeleteDB, appsyncGetDB, appsyncSaveDB, appsyncUpdateeDB } from "src/db/appsync";
 import { DBConfig } from "src/db/DBConfig";
 import { UserDetailsServices } from "src/services/UserDetailsServices";
 
@@ -8,13 +8,16 @@ import { UserDetailsServices } from "src/services/UserDetailsServices";
 export async function getALLUserInfo(): Promise<any> {
 
     let response: any;
+    let responseObj: any;
     let userDetailService = new UserDetailsServices();
-    let configDB = new DBConfig();
+    //let configDB = new DBConfig();
 
     try {
 
-        const dataItemObj = await configDB.dbGetAllUserInfoService();
-        response = userDetailService.responseObject(Success_Code, JSON.stringify(dataItemObj));
+        //const dataItemObj = await configDB.dbGetAllUserInfoService();
+        //response = userDetailService.responseObject(Success_Code, JSON.stringify(dataItemObj));
+        responseObj = await appsyncALLDB();
+        response = userDetailService.responseObject(Success_Code, JSON.stringify(responseObj));
         console.log('response - ', response);
 
     } catch (err) {
@@ -64,28 +67,27 @@ export async function saveUserInfoDetails(event: any) {
 
         //await configDB.dbSaveUserInfoService(event);
         responseObj = await appsyncSaveDB(event);
-        response = userDetailService.responseObject(Success_Code, responseObj);
+        response = userDetailService.responseObject(Success_Code, JSON.stringify(responseObj));
         console.log('response - ', response);
-
     } catch (err) {
-
         response = userDetailService.responseObject(Failure_Code, Failure_Message);
         console.log(err.message);
     }
-
     return response;
 }
 
 export async function updateUserInfoDetails(event: any): Promise<any> {
-
+    let responseObj: any;
     let response: any;
     let userDetailService = new UserDetailsServices();
-    let configDB = new DBConfig();
+    //let configDB = new DBConfig();
 
     try {
 
-        await configDB.dbUpdateUserInfoService(event);
-        response = userDetailService.responseObject(Success_Code, `${event.pathParameters.userId} - ${Success_Message}`);
+        //await configDB.dbUpdateUserInfoService(event);
+        //response = userDetailService.responseObject(Success_Code, `${event.pathParameters.userId} - ${Success_Message}`);
+        responseObj = await appsyncUpdateeDB(event);
+        response = userDetailService.responseObject(Success_Code, `${responseObj.userId} - ${Success_Message}`);
         console.log('response - ', response);
 
     } catch (err) {
@@ -97,25 +99,20 @@ export async function updateUserInfoDetails(event: any): Promise<any> {
 }
 
 export async function deleteUserInfoById(event: any): Promise<any> {
-
+    let responseObj: any;
     let response: any;
     let userDetailService = new UserDetailsServices();
-    let configDB = new DBConfig();
+    //let configDB = new DBConfig();
 
     try {
-        await configDB.dbDeleteUserInfoService(event);
-        response = userDetailService.responseObject(Success_Code, `${event.pathParameters.userId} - ${Delete_Success_Message}`);
+        //await configDB.dbDeleteUserInfoService(event);
+        //response = userDetailService.responseObject(Success_Code, `${event.pathParameters.userId} - ${Delete_Success_Message}`);
+        responseObj = await appsyncDeleteDB(event);
+        response = userDetailService.responseObject(Success_Code, `${responseObj.userId}- ${Delete_Success_Message}`);
         console.log('response - ', response);
-
     } catch (err) {
-
         response = userDetailService.responseObject(Failure_Code, `${event.pathParameters.userId} - ${Delete_Failure_Message}`);
         console.log(err.message);
     }
-
     return response;
 }
-
-
-
-
