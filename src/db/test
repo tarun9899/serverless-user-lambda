@@ -1,0 +1,11 @@
+query MyQuery {
+  getUserInfoDevTable(userId: "ce4b8d35-c3c4-40b2-af86-f437a93bf056") {
+    firstName
+    lastName
+    age
+    gender
+    department
+  }
+}
+
+da2-ujpwszlfujabjpa6gpzounyody
