@@ -1,7 +1,7 @@
 
 import { Delete_Failure_Message, Delete_Success_Message, Dyanamo_DB_GET_Error, Failure_Code, Failure_Message, Success_Code, Success_Message } from "src/constants/UserConstants";
 import { appsyncALLDB, appsyncDeleteDB, appsyncGetDB, appsyncSaveDB, appsyncUpdateeDB } from "src/db/appsync";
-import { DBConfig } from "src/db/DBConfig";
+// import { DBConfig } from "src/db/DBConfig";
 import { UserDetailsServices } from "src/services/UserDetailsServices";
 
 
